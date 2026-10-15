@@ -1,0 +1,7 @@
+{
+  "apiKey": "",
+  "baseUrl": "https://api.example.com",
+  "model": "vision-model-id",
+  "deepseekApiKey": "",
+  "qwenPaidApiKey": ""
+}
