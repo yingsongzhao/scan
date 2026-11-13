@@ -13,7 +13,12 @@ function repairMath(formula){let out=String(formula).replace(/\^\{?\\?(?:circ|de
 // A formula with no LaTeX-only syntax can be shown as plain text (better than a KaTeX dependency).
 const isPlain=formula=>!/[\\{}_^]/.test(formula);
 // Recognize math boundaries, not escaped dollar signs or currency such as "$5 and $10".
-function segments(text){const out=[];const pattern=/(?<!\\)\$\$([\s\S]+?)(?<!\\)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|(?<!\\)\$(?![\s$])((?:\\[^\n]|[^$\\\n])+?)(?<![\s\\])\$(?!\d)/g;let end=0,m;while((m=pattern.exec(text))){out.push({kind:'text',value:text.slice(end,m.index)});const formula=repairMath(m[1]??m[2]??m[3]??m[4]);const open=m[1]!==undefined?'$$':m[2]!==undefined?'\\[':m[3]!==undefined?'\\(': '$';const close=m[1]!==undefined?'$$':m[2]!==undefined?'\\]':m[3]!==undefined?'\\)':'$';out.push({kind:'math',value:open+formula+close,formula,display:m[1]!==undefined||m[2]!==undefined});end=pattern.lastIndex}out.push({kind:'text',value:text.slice(end)});return out}
+// Adjacent inline formulas joined only by a ratio separator (":" or "∶") render
+// badly apart: the colon falls outside math and shows as a small raised glyph with
+// wide gaps. Merge them into one formula so the ratio is typeset as a whole.
+const RATIO=/^\s*[:∶]\s*$/;
+function mergeRatio(parts){const out=[];for(let i=0;i<parts.length;i++){const part=parts[i];if(part.kind==='math'&&!part.display){let formula=part.formula,n=0;while(i+n+2<parts.length&&parts[i+n+1].kind==='text'&&RATIO.test(parts[i+n+1].value)&&parts[i+n+2].kind==='math'&&!parts[i+n+2].display){formula+=':'+parts[i+n+2].formula;n+=2}if(n){out.push({kind:'math',value:'$'+formula+'$',formula,display:false});i+=n;continue}}out.push(part)}return out}
+function segments(text){const out=[];const pattern=/(?<!\\)\$\$([\s\S]+?)(?<!\\)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|(?<!\\)\$(?![\s$])((?:\\[^\n]|[^$\\\n])+?)(?<![\s\\])\$(?!\d)/g;let end=0,m;while((m=pattern.exec(text))){out.push({kind:'text',value:text.slice(end,m.index)});const formula=repairMath(m[1]??m[2]??m[3]??m[4]);const open=m[1]!==undefined?'$$':m[2]!==undefined?'\\[':m[3]!==undefined?'\\(': '$';const close=m[1]!==undefined?'$$':m[2]!==undefined?'\\]':m[3]!==undefined?'\\)':'$';out.push({kind:'math',value:open+formula+close,formula,display:m[1]!==undefined||m[2]!==undefined});end=pattern.lastIndex}out.push({kind:'text',value:text.slice(end)});return mergeRatio(out)}
 function normalize(text){return segments(String(text)).map(part=>{
  if(part.kind==='math'){const inner=part.formula.trim();if(/^(?:\\_\s*){2,}$/.test(inner))return inner.replace(/\\_/g,'_');return isPlain(inner)?inner:part.value}
  // Markdown punctuation escapes are unnecessary in plain text. Do not unescape TeX commands or braces.

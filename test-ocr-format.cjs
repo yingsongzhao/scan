@@ -17,7 +17,13 @@ const cases=[
  [String.raw`$leq 3$`,'≤ 3'],
  ['正文里的 triangle 与 angle 不应被改写','正文里的 triangle 与 angle 不应被改写'],
  [String.raw`$x^circ$`,'x°'],
+ // 相邻公式之间的比值冒号应合并为一个公式，避免正文冒号排版偏上、间距过大
+ [String.raw`$S_{△ABP}$∶$S_{△BCP}$∶$S_{△ACP}$`,String.raw`$S_{△ABP}:S_{△BCP}:S_{△ACP}$`],
+ [String.raw`$A$∶$B$`,'A:B'],
+ [String.raw`$A$ 与 $B$`,'A 与 B']
 ];for(const [input,expected] of cases){assert.equal(normalize(input),expected,input);assert.equal(normalize(normalize(input)),expected,'幂等性：'+input)}
+assert.equal(segments(String.raw`$S_{△ABP}$∶$S_{△BCP}$∶$S_{△ACP}$`).filter(x=>x.kind==='math').length,1,'比值冒号应合并为单个公式');
+assert.equal(segments(String.raw`$$A$$∶$$B$$`).filter(x=>x.kind==='math').length,2,'展示公式不合并');
 const katex=require('katex');
 for(const text of [String.raw`$S_{△ABP}:S_{△BCP}:S_{△ACP}=$`,String.raw`\(\frac{a_1}{b}\)`,String.raw`$$a^2$$`,String.raw`$x_1+\_$`,String.raw`$\frac{△ABC}{2}$`]){
   for(const part of segments(text))if(part.kind==='math')assert.doesNotThrow(()=>katex.renderToString(part.formula,{throwOnError:true,strict:'ignore'}),'KaTeX 无法解析：'+part.formula);
