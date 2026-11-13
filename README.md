@@ -7,6 +7,8 @@ A teacher-focused tool that turns exam photos into editable text, with manual so
 - Upload JPG/PNG/WEBP images, rotate, crop a question region, and zoom for careful selection.
 - Edit OCR output and review flagged uncertain text.
 - Render math with KaTeX and preserve original diagram crops alongside editable text.
+- The HTML export renders formulas as copy-safe inline text, so pasted text keeps its line structure; printing still uses full KaTeX typesetting.
+- Copy and TXT export convert formulas to plain Unicode text (`S△ABP`, `x²`, `√3`, `(a+1)/(2b)`), so the downloaded text matches the printed question.
 - Draw points, lines, triangles, rectangles, circles, and labels on a geometry board; zoom, pan, undo/redo, export SVG and editable project JSON.
 - Responsive tablet workspace and three UI themes.
 - The interface currently sends recognition requests to a fixed, server-side provider route. Do not put provider selection or credentials in browser code.
@@ -28,6 +30,7 @@ Supported server-side settings include:
 - `QWEN_API_KEY`, `QWEN_BASE_URL`, `QWEN_MODEL`
 - `DEEPSEEK_API_KEY`
 - `QWEN_PAID_API_KEY`
+- `DEFAULT_PROVIDER` (`qwen-paid` by default; set to `original` for a local setup that only has the original model key)
 
 The production Qwen-compatible endpoint and model route are fixed in the server implementation. Never put provider credentials in frontend code, test fixtures, or GitHub.
 
@@ -46,6 +49,7 @@ Set `NODE_ENV=production`, `AUTH_DATA_FILE`, `AUTH_SECURE=true`, and `PUBLIC_ORI
 ## Important limitations
 
 - Vision models can misread text, numbers, formulas, choices, and diagrams. Verify every result against the source.
+- The server repairs malformed LaTeX from the model (for example a `triangle` command without its backslash) and converts common symbols to Unicode (△, ∠, ⊥, ∥, ≤, ≥, °). This prevents garbled symbols in the editor and preview, but it is not a substitute for checking the original.
 - Images selected for recognition are sent from the browser through this service to the configured model provider. Confirm that this data transfer is permitted for your images.
 - Pricing, retention, availability, and rate limits are controlled by each model provider.
 - This repository intentionally excludes sample exam images, OCR results, production deployment files, user databases, and secrets.
