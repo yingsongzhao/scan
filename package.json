@@ -7,7 +7,6 @@
     "test": "node test-qwen-paid.cjs && node test-qwen-proxy.cjs && node test-auth.cjs && node test-ocr-format.cjs && node test-geometry-board.cjs && node test-math-layout.cjs"
   },
   "dependencies": {
-    "katex": "0.16.11",
-    "tesseract.js": "^5.1.1"
+    "katex": "0.16.11"
   }
 }
