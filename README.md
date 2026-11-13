@@ -42,6 +42,13 @@ pnpm test
 
 The tests use mocked upstreams or temporary authentication data; they do not need production credentials.
 
+## Releases and rollback
+
+- Tag every releasable state with a semantic version: `git tag -a v1.2.0 -m "..."`, then `git push origin v1.2.0`.
+- Release flow: commit everything, tag the version, deploy, and record the tag name in the deployment log so a rollback target is unambiguous.
+- Roll back with `git switch --detach <tag>` to inspect, `git restore --source <tag> -- <file>` for a single file, or `git reset --hard <tag>` for the whole tree (`git reflog` can recover). Production keeps tar backups of the previous app directory as a second line of defence.
+- Current release: `v1.1.0` (2026-11-13; LaTeX symbol repair, ratio formula merging, copy-safe HTML export, plain-text TXT/copy).
+
 ## Production security
 
 Set `NODE_ENV=production`, `AUTH_DATA_FILE`, `AUTH_SECURE=true`, and `PUBLIC_ORIGIN` behind a trusted TLS reverse proxy. Production startup fails if whitelist authentication is not configured. Keep the account database outside the web root and protect provider credentials with restrictive file permissions. Configure an administrator through the server-side bootstrap process; do not publish initial credentials.
