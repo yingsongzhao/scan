@@ -2,6 +2,7 @@
   "apiKey": "",
   "baseUrl": "https://api.example.com",
   "model": "vision-model-id",
+  "defaultProvider": "qwen-paid",
   "deepseekApiKey": "",
   "qwenPaidApiKey": ""
 }
